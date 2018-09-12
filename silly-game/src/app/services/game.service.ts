@@ -8,7 +8,10 @@ export class GameService {
 
   constructor(private _http: HttpClient) { }
 
-  stat() {
-    return this._http.get("http://localhost:8080/api/v1/gameservice/score/red-count");
+  getStat(key) {
+    return this._http.get("http://localhost:8080/api/v1/gameservice/score/" + key);
+  }
+  incrementKey(key) {
+    return this._http.put("http://localhost:8080/api/v1/gameservice/score/" + key, {});
   }
 }
