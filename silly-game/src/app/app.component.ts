@@ -8,12 +8,12 @@ import { Chart } from 'chart.js';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  chart = [];
+  chart : any = [] ;
   stat = 0;
 
   constructor(private _game: GameService) {
     _game.stat().subscribe(
-      data => { this.stat = Number(data.value)},
+      (data : any) => { this.stat = Number(data.value)},
       err => console.error(err),
       () => console.log('done loading data')
     );
@@ -23,8 +23,8 @@ export class AppComponent {
   }  
 
 
-  update() {
-    this.chart.data.datasets[0].data[1] = this.chart.data.datasets[0].data[1] + 2;
+  update(index) {
+    this.chart.data.datasets[0].data[index] = this.chart.data.datasets[0].data[index] + 2;
     this.chart.update();
   }
 
