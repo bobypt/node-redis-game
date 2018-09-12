@@ -1,0 +1,15 @@
+redis:
+    image: redis
+    container_name: cache-server
+    expose:
+    - 6379
+api:
+    build: ./api/
+    container_name: api-server    
+    ports:
+    - 8080:8080
+    links:
+    - "redis:cache-server"    
+    environment:
+    - REDIS_HOST=cache-server
+    - REDIS_PORT=6379
