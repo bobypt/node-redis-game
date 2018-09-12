@@ -3,6 +3,9 @@
 const express = require('express');
 const uuidv1 = require('uuid/v1');
 var redis = require('redis');
+var cors = require('cors')
+
+
 const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 
@@ -15,6 +18,14 @@ const CONTEXT_BASE = "/api/v1/gameservice"
 
 // App
 const app = express();
+
+//cors
+var corsOptions = {
+  origin: 'http://localhost',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors());
 
 //logging middleware
 app.use(function (req, res, next) {
