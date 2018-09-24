@@ -15,6 +15,8 @@ export class GameComponent implements OnInit {
     { name: "BLUE", key: "key-blue", class: "btn-primary" }
   ];
 
+  animate: boolean = true;
+
 
   constructor(private _gameService: GameService) { }
 
@@ -22,6 +24,7 @@ export class GameComponent implements OnInit {
   }
 
   update(option) {
+    this.animate = !this.animate;
     this.shuffle(this.options);
     console.log("seletced  " + option.key);
     this._gameService.incrementKey(option.key).subscribe(

@@ -1,7 +1,10 @@
-<h1 class="animated bounce delay-2s">+1</h1>
-
 <div class="row">
     <div class="col-sm" *ngFor="let option of options; let i = index">
         <button type="button" (click)="update(option)" class="btn btn-lg btn-block {{option.class}}">{{option.name}}</button>
     </div>
   </div>
+  <div class="row text-centers">
+        <h1 class="display-1 text-dark animated slideOutDown delay-2s" *ngIf="animate">+1</h1>
+        <h1 class="display-1 text-dark animated slideOutRight delay-2s" *ngIf="!animate">+1</h1> 
+  </div>
+
