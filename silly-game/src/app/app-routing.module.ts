@@ -6,7 +6,7 @@ import { GameComponent }   from './pages/game/game.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/admin', pathMatch: 'full' },
+  { path: '', redirectTo: '/play', pathMatch: 'full' },
   { path: 'admin', component: AdminComponent },
   { path: 'play', component: GameComponent },
 ];

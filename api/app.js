@@ -2,8 +2,10 @@
 
 const express = require('express');
 const uuidv1 = require('uuid/v1');
+const bodyParser = require('body-parser');
 var redis = require('redis');
 var cors = require('cors')
+
 
 
 const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
@@ -22,10 +24,12 @@ const app = express();
 //cors
 var corsOptions = {
   origin: 'http://localhost',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200 
 }
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json())
 
 //logging middleware
 app.use(function (req, res, next) {
@@ -56,6 +60,24 @@ app.put(CONTEXT_BASE+'/score/:key', (req, res) => {
         client.setnx(req.params.key, '1', redis.print);
     }
     res.json({key: req.params.key, value: result});
+  });
+});
+
+
+//auth middleware
+function isAuthenticated(req, res, next) {
+  if (req.body && req.body.token===ID)
+      return next();
+
+  res.json({status: "Unauthorised"});
+}
+
+app.put(CONTEXT_BASE+'/admin/reset', isAuthenticated, (req, res) => {
+  client.flushall(function (error, result) {
+    if (error) {
+        console.log(error);
+    }
+    res.json({status: "OK"});
   });
 });
 

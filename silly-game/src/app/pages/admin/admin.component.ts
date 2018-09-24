@@ -9,14 +9,11 @@ import { timer, Subscription} from 'rxjs';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
-  // redCount: number = 0;
-  // blueCount: number = 0;
-  // greenCount: number = 0;
-
   values = new Map<string, number>();
 
   chart: any = [];
   timerSubscription : Subscription;
+  pause: boolean = false;
 
 
   constructor(private _gameService: GameService) { }
@@ -33,11 +30,16 @@ export class AdminComponent implements OnInit {
 
     this.timerSubscription = timer(1000, 1000)
     .subscribe(val => {
-      this.updateAll();
+      if(!this.pause) {
+        this.updateAll();
+      }
     }); 
 
   }
 
+  togglePause() {
+    this.pause = !this.pause;
+  }  
   updateAll() {
     this.updateData("key-red");
     this.updateData("key-green");
