@@ -16,6 +16,7 @@ export class GameComponent implements OnInit {
   ];
 
   animate: boolean = true;
+  text: string = "";
 
 
   constructor(private _gameService: GameService) { }
@@ -27,6 +28,7 @@ export class GameComponent implements OnInit {
     this.animate = !this.animate;
     this.shuffle(this.options);
     console.log("seletced  " + option.key);
+    this.text = option.name;
     this._gameService.incrementKey(option.key).subscribe(
         (data : any) => { console.log("updated successfully")},
         err => console.error(err),
