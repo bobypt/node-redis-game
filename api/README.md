@@ -10,21 +10,20 @@
  Application will start locally and listen on port 8080.
 
  ## Test
- health url -  ```curl localhost:8080/api/v1/orderservice/health```
- get order details -  ```curl localhost:8080/api/v1/orderservice/orders/875855955```
-
+ health url -  ```curl localhost:8080/api/v1/gameservice/health```
+ 
  ## Build docker image
-```docker build -t msdemo/orderservice .```
+```docker build -t msdemo/gameservice .```
 
 ## Start a container
-```docker run -p 8080:8080 --name order-service -t msdemo/orderservice```
+```docker run -p 8080:8080 --name game-service -t msdemo/gameservice```
 
 ## Stop the server
-```docker rm -f order-service```
+```docker rm -f game-service```
 
 ## Running redis locally
 
-### Start
+### start
 ```docker pull redis```
 
 ```docker run -p 6379:6379 --name some-redis -d redis```

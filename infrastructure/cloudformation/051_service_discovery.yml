@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: An internal service discovery namespace
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: The name of the environment to add this service discovery namespace to
+  Domain:
+    Type: String
+    Default: service
+    Description: The name of the namespace. Services are prepended, for example auth.service
+Resources:
+  # Rule which allows the containers to talk to other containers in the same group.
+  # This is what allows a container to use service discovery to get the IP and talk
+  # to another container in the same group.
+  EcsSecurityGroupIngressFromSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress from other containers in the cluster
+      GroupId: 
+        Fn::ImportValue: !Join [':', [!Ref 'EnvironmentName', 'FargateContainerSecurityGroup']]
+      IpProtocol: -1
+      SourceSecurityGroupId: 
+        Fn::ImportValue: !Join [':', [!Ref 'EnvironmentName', 'FargateContainerSecurityGroup']]
+
+  ServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: !Ref Domain
+      Vpc:
+        Fn::ImportValue: !Join [':', [!Ref 'EnvironmentName', 'VPCId']]
+
+Outputs:
+  PrivateServiceDiscoveryNamespace:
+    Description: The ID of the private service discovery namespace
+    Value: !Ref ServiceDiscoveryNamespace
+    Export:
+      Name: !Sub ${EnvironmentName}:PrivateServiceDiscoveryNamespace
+  

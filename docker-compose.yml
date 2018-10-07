@@ -3,6 +3,8 @@ redis:
     container_name: cache-server
     expose:
     - 6379
+    ports:
+    - 6379:6379
 api:
     build: ./api/
     container_name: api-server    
