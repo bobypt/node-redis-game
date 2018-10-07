@@ -68,7 +68,17 @@ Outputs:
     Description: The url of the external load balancer
     Value: !Join ['', ['http://', !GetAtt 'PublicLoadBalancer.DNSName']]
     Export:
-      Name: !Join [ ':', [ !Ref EnvironmentName, 'ExternalUrl' ] ]     
+      Name: !Join [ ':', [ !Ref EnvironmentName, 'ExternalUrl' ] ]  
+  AlbDnsName:
+    Description: The DNSName of the external load balancer
+    Value: !GetAtt 'PublicLoadBalancer.DNSName'
+    Export:
+      Name: !Join [ ':', [ !Ref EnvironmentName, 'AlbDnsName' ] ]  
+  AlbHostedZoneId:
+    Description: The CanonicalHostedZoneID of the external load balancer
+    Value: !GetAtt 'PublicLoadBalancer.CanonicalHostedZoneID'
+    Export:
+      Name: !Join [ ':', [ !Ref EnvironmentName, 'AlbHostedZoneId' ] ]                 
   PublicLoadBalancerListener:
     Description: PublicLoadBalancerListener
     Value: !Ref 'PublicLoadBalancerListener'

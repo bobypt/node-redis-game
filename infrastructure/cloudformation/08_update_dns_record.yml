@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Update DNS.
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: Demo1
+    Description: The name of the environment.
+  HostedZoneName:
+    Type: String
+    Default: example.com
+    Description: The name of the hosted zone in route53..    
+Resources:
+  myDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: DNS record
+      HostedZoneName: !Ref 'HostedZoneName'
+      Name: !Join ['.', [!Ref 'EnvironmentName', !Ref 'HostedZoneName']]
+      Type: A
+      AliasTarget: 
+        DNSName:
+          Fn::ImportValue:
+            !Join [':', [!Ref 'EnvironmentName', 'AlbDnsName']]    
+        EvaluateTargetHealth: false
+        HostedZoneId: 
+          Fn::ImportValue:
+            !Join [':', [!Ref 'EnvironmentName', 'AlbHostedZoneId']]  
+  
