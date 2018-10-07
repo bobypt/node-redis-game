@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: API service - customer service
+Description: Redis
 Parameters:
   EnvironmentName: 
     Type: String
@@ -7,15 +7,15 @@ Parameters:
     Description: Name of the environment.
   ServiceName:
     Type: String
-    Default: "game-api"
+    Default: "cache-server"
     Description: Service name
   ImageUrl:
     Type: String
-    Default: 708464146667.dkr.ecr.ap-southeast-2.amazonaws.com/sillygame_api:latest
+    Default: redis:latest
     Description: The url of a docker image
   ContainerPort:
     Type: Number
-    Default: 8080
+    Default: 6379
     Description: API port
   TaskCpu:
     Type: Number
@@ -25,17 +25,13 @@ Parameters:
     Type: Number
     Default: 512
     Description: How much memory in megabytes to give the container
-  Path:
-    Type: String
-    Default: "/api/v1/gameservice/*"
-    Description: A path on the public load balancer.
   Priority:
     Type: Number
     Default: 1
     Description: The priority for the routing rule.
   DesiredCount:
     Type: Number
-    Default: 2
+    Default: 1
     Description: How many copies of the service task to run
   Role:
     Type: String
@@ -73,10 +69,8 @@ Resources:
           Memory: !Ref 'TaskMemory'
           Image: !Ref 'ImageUrl'
           Environment:
-            - Name: REDIS_HOST
-              Value: 'cache-server'
-            - Name: REDIS_PORT
-              Value: '6379'              
+            - Name: SOME_ENDPOINT
+              Value: 'TODO'
           PortMappings:
             - ContainerPort: !Ref 'ContainerPort'
           LogConfiguration:
@@ -86,12 +80,23 @@ Resources:
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: !Ref 'ServiceName'
 
+   # Create a service discovery service in the private service namespace.
+  ServiceDiscoveryService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: !Ref ServiceName
+      DnsConfig:
+        DnsRecords: [{Type: A, TTL: "10"}]
+        NamespaceId:
+          Fn::ImportValue: !Sub ${EnvironmentName}:PrivateServiceDiscoveryNamespace
+      HealthCheckCustomConfig:
+        FailureThreshold: 1              
+
   # The service. The service is a resource which allows you to run multiple
   # copies of a type of task, and gather up their logs and metrics, as well
   # as monitor the number of running tasks and replace any that have crashed
   Service:
     Type: AWS::ECS::Service
-    DependsOn: LoadBalancerRule
     Properties:
       ServiceName: !Ref 'ServiceName'
       Cluster:
@@ -114,54 +119,13 @@ Resources:
             - Fn::ImportValue:
                 !Join [':', [!Ref 'EnvironmentName', 'PrivateSubnetTwo']]
       TaskDefinition: !Ref 'TaskDefinition'
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscoveryService.Arn      
       Role:
         Fn::If:
           - 'HasCustomRole'
           - !Ref 'Role'
           - !Ref "AWS::NoValue"
-      LoadBalancers:
-        - ContainerName: !Ref 'ServiceName'
-          ContainerPort: !Ref 'ContainerPort'
-          TargetGroupArn: !Ref 'TargetGroup'
 
-  # A target group. This is used for keeping track of all the tasks, and
-  # what IP addresses / port numbers they have. You can query it yourself,
-  # to use the addresses yourself, but most often this target group is just
-  # connected to an application load balancer, or network load balancer, so
-  # it can automatically distribute traffic across all the targets.
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      HealthCheckIntervalSeconds: 20
-      HealthCheckPath: /api/v1/gameservice/health
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      TargetType: ip
-      Name: !Ref 'ServiceName'
-      Port: 8080
-      Protocol: HTTP
-      UnhealthyThresholdCount: 2
-      TargetGroupAttributes:
-        - Key: stickiness.enabled
-          Value: false
-      VpcId:
-        Fn::ImportValue:
-          !Join [':', [!Ref 'EnvironmentName', 'VPCId']]
-
-  # Create a rule on the load balancer for routing traffic to the target group
-  LoadBalancerRule:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    Properties:
-      Actions:
-        - TargetGroupArn: !Ref 'TargetGroup'
-          Type: 'forward'
-      Conditions:
-        - Field: path-pattern
-          Values: [!Ref 'Path']
-      ListenerArn:
-        Fn::ImportValue:
-          !Join [':', [!Ref 'EnvironmentName', 'PublicLoadBalancerListener']]
-      Priority: !Ref 'Priority'
 
 
